@@ -3,177 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Biker Suite</title>
+    <title>Apex Fleet Suite</title>
     <style>
-        :root { --bg: #0a0a0a; --card: #1c1c1c; --accent: #ff4d00; --text: #eee; --green: #39ff14; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        header { padding: 10px; text-align: center; border-bottom: 2px solid var(--accent); background: #000; }
-        main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
-        .view { padding: 15px; }
-        .hidden { display: none; }
-        .card { background: var(--card); border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
-        input, select { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; margin-top: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--accent); color: white; }
-        .progress { background: #333; height: 8px; border-radius: 4px; margin-top: 10px; }
-        .progress-fill { background: var(--green); height: 100%; border-radius: 4px; width: 0%; transition: 0.5s; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; padding: 10px 0; }
-        .tab-bar button { background: none; flex: 1; margin: 0; font-size: 0.7rem; color: #888; }
-        .tab-bar button.active { color: var(--accent); }
-        .history-list { font-size: 0.8rem; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; }
-        .gear-visual { display: flex; gap: 5px; height: 50px; align-items: flex-end; margin-top: 10px; }
-        .gear-bar { background: var(--accent); flex: 1; text-align: center; font-size: 10px; }
+        :root { --main-color: #ff4d00; --bg: #0a0a0a; --card: #161616; --text: #eee; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Header & Navigation */
+        header { padding: 15px; text-align: center; border-bottom: 2px solid var(--main-color); background: #000; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
+        .tab-bar button { background: none; border: none; color: #888; flex: 1; font-size: 1.2rem; cursor: pointer; }
+        .tab-bar button.active { color: var(--main-color); }
+
+        /* Layout */
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--main-color); }
+        
+        /* Formulare */
+        h2 { color: var(--main-color); margin-top: 0; font-size: 1.1rem; }
+        input, select, textarea { width: 100%; padding: 10px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px; margin: 5px 0 10px 0; box-sizing: border-box; }
+        button.action-btn { background: var(--main-color); color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; }
+        button.delete-btn { background: #444; color: #ff4444; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; margin-top: 5px; cursor: pointer; }
+
+        /* Spezifische Elemente */
+        .progress-bg { background: #333; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress-fill { background: var(--main-color); height: 100%; border-radius: 5px; width: 0%; transition: 0.5s; }
+        .history-item { background: #222; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.9rem; position: relative; }
+        .bike-anim { font-size: 40px; text-align: center; margin: 20px 0; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<header><h1 id="title">BIKER DASHBOARD</h1></header>
+<header><h1 id="app-title">Motorrad</h1></header>
 
-<main>
-    <section id="dash" class="view">
+<main id="content">
+    <section id="view-bike" class="view active">
         <div class="card">
-            <h3>Wetter Live</h3>
-            <button onclick="updateWeather()">Wetter aktualisieren</button>
-            <p id="weather-desc">Klicke zum Laden...</p>
+            <h2 id="bike-name-display">Mein Motorrad</h2>
+            <div id="weather-box">Wetter wird geladen...</div>
+            <p id="ride-recommendation" style="font-weight:bold"></p>
         </div>
-        <div class="card">
-            <h3>Service-Status</h3>
-            <p id="km-info">Aktuell: 0 km / Ziel: 0 km</p>
-            <div class="progress"><div id="service-bar" class="progress-fill"></div></div>
-            <input type="number" id="input-km" placeholder="Aktueller km-Stand">
-            <input type="number" id="input-next" placeholder="Service bei (km)">
-            <button onclick="saveService()">Speichern</button>
-        </div>
-    </section>
 
-    <section id="phys" class="view hidden">
         <div class="card">
-            <h3>Schräglage: <span id="lean-val">0</span>°</h3>
-            <input type="range" min="10" max="150" value="50" oninput="calcPhys(this.value)">
-            <div id="bike" style="font-size: 40px; text-align: center; transition: 0.3s;">🏍️</div>
+            <h2>📝 Logbuch</h2>
+            <input type="number" id="log-km" placeholder="Gefahrene km">
+            <input type="number" id="log-time" placeholder="Zeit (Minuten)">
+            <select id="log-fun"><option value="1">Lame</option><option value="5">Mittel</option><option value="10">Adrenalin pur!</option></select>
+            <button class="action-btn" onclick="addLog('bike')">Fahrt speichern</button>
+            <div id="log-history-bike"></div>
         </div>
+
         <div class="card">
-            <h3>Gang-Visualisierer</h3>
-            <p>V-Max pro Gang (Beispiel-Setup):</p>
-            <div class="gear-visual" id="gear-container">
-                <div class="gear-bar" style="height: 20%">1.</div>
-                <div class="gear-bar" style="height: 40%">2.</div>
-                <div class="gear-bar" style="height: 60%">3.</div>
-                <div class="gear-bar" style="height: 80%">4.</div>
-                <div class="gear-bar" style="height: 90%">5.</div>
-                <div class="gear-bar" style="height: 100%">6.</div>
+            <h2>🔧 Service</h2>
+            <label>Aktueller km-Stand:</label>
+            <input type="number" id="serv-km-bike" onchange="updateService('bike')">
+            <div class="progress-bg"><div id="serv-bar-bike" class="progress-fill"></div></div>
+            <p id="serv-text-bike">Service fällig bei 15.000 km</p>
+            <hr>
+            <p>Letzte Reinigung (Kette/Wäsche): <span id="clean-date-bike">-</span></p>
+            <button class="action-btn" style="background:#444" onclick="setCleanDate('bike')">Jetzt gereinigt & gewaschen</button>
+        </div>
+
+        <div class="card">
+            <h2>⛽ Tanken</h2>
+            <input type="file" id="receipt-bike" accept="image/*" onchange="simulateAI('bike')">
+            <p><small>(KI-Simulation: Foto hochladen oder manuell eintragen)</small></p>
+            <input type="number" id="tank-price" placeholder="Preis (€)">
+            <input type="text" id="tank-loc" placeholder="Ort/Tankstelle">
+            <button class="action-btn" onclick="addTank('bike')">Manuell speichern</button>
+            <div id="tank-history-bike"></div>
+        </div>
+
+        <div class="card">
+            <h2>🛡️ Ausrüstungs-Check</h2>
+            <div id="check-list-bike">
+                <label><input type="checkbox"> Helm okay/Alter?</label><br>
+                <label><input type="checkbox"> Kombi intakt?</label><br>
+                <label><input type="checkbox"> Kette Spannung/Fett?</label><br>
+                <label><input type="checkbox"> Luftdruck okay?</label><br>
+                <label><input type="checkbox"> Elektrik Check?</label>
             </div>
+            <p id="check-date-bike"></p>
+            <button class="action-btn" onclick="quittieren('bike')">Quittieren & Speichern</button>
+            <button class="delete-btn" onclick="resetCheck('bike')">Check löschen</button>
+        </div>
+
+        <div class="card">
+            <h2>📐 Fahrerische Daten</h2>
+            <label>Speed: <span id="v-val">50</span> km/h</label>
+            <input type="range" min="20" max="200" value="50" oninput="calcLean(this.value)">
+            <div class="bike-anim" id="bike-icon">🏍️</div>
         </div>
     </section>
 
-    <section id="log" class="view hidden">
+    <section id="view-car" class="view">
         <div class="card">
-            <h3>Tankstopp eintragen</h3>
-            <input type="number" id="fuel-km" placeholder="km-Stand">
-            <input type="number" id="fuel-l" placeholder="Liter">
-            <button onclick="saveFuel()">Eintragen</button>
-            <div class="history-list" id="fuel-history">Keine Einträge</div>
+            <h2 id="car-name-display">Mein Auto</h2>
+            <div id="weather-box-car">Wetter-Daten identisch...</div>
         </div>
+        <div class="card"><h2>📝 Logbuch</h2><input type="number" id="log-km-car"><button class="action-btn" onclick="addLog('car')">Speichern</button><div id="log-history-car"></div></div>
+        <div class="card"><h2>🔧 Service</h2><input type="number" id="serv-km-car" onchange="updateService('car')"><div class="progress-bg"><div id="serv-bar-car" class="progress-fill"></div></div><p id="serv-text-car"></p></div>
     </section>
 
-    <section id="garage" class="view hidden">
+    <section id="view-settings" class="view">
         <div class="card">
-            <h3>Mein Bike</h3>
-            <input type="text" id="bike-name" placeholder="Modell (z.B. Z900)">
-            <input type="date" id="bike-date" title="Kaufdatum">
-            <button onclick="saveBike()">Bike-Daten speichern</button>
-            <p id="bike-display"></p>
+            <h2>🎨 Design</h2>
+            <label>App-Farbe wählen:</label>
+            <input type="color" id="color-picker" value="#ff4d00" onchange="changeTheme(this.value)">
         </div>
         <div class="card">
-            <h3>Ausrüstungs-Check</h3>
-            <label><input type="checkbox" onchange="checkGear()"> Helm (Alter < 5J?)</label><br>
-            <label><input type="checkbox" onchange="checkGear()"> Kette geschmiert?</label><br>
-            <label><input type="checkbox" onchange="checkGear()"> Reifendruck okay?</label>
-            <p id="gear-status" style="margin-top:10px"></p>
+            <h2>🏎️ Fuhrpark</h2>
+            <input type="text" id="set-bike-name" placeholder="Name Motorrad (z.B. BMW S1000RR)">
+            <input type="text" id="set-car-name" placeholder="Name Auto (z.B. Audi RS6)">
+            <button class="action-btn" onclick="saveFleet()">Fuhrpark speichern</button>
         </div>
     </section>
 </main>
 
 <nav class="tab-bar">
-    <button onclick="show('dash', this)" class="active">Dash</button>
-    <button onclick="show('phys', this)">Technik</button>
-    <button onclick="show('log', this)">Log</button>
-    <button onclick="show('garage', this)">Garage</button>
+    <button onclick="switchTab('bike', this)" class="active">🏍️</button>
+    <button onclick="switchTab('car', this)">🚗</button>
+    <button onclick="switchTab('settings', this)">⚙️</button>
 </nav>
 
 <script>
-    // Navigation
-    function show(id, btn) {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    // Datenstruktur Initialisierung
+    let db = JSON.parse(localStorage.getItem('apex_db')) || {
+        bike: { name: "Motorrad", logs: [], tank: [], km: 0, clean: "-", check: "-" },
+        car: { name: "Auto", logs: [], tank: [], km: 0, clean: "-", check: "-" },
+        theme: "#ff4d00"
+    };
+
+    function saveDB() { localStorage.setItem('apex_db', JSON.stringify(db)); }
+
+    // Tab Wechsel
+    function switchTab(type, btn) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.remove('hidden');
+        document.getElementById('view-' + type).classList.add('active');
         btn.classList.add('active');
+        document.getElementById('app-title').innerText = type === 'bike' ? 'Motorrad' : (type === 'car' ? 'Auto' : 'Einstellungen');
     }
 
-    // 1. Wetter & Service
+    // Wetter & KI Empfehlung
     async function updateWeather() {
-        document.getElementById('weather-desc').innerText = "Lade...";
-        // Nutzt öffentliche API ohne Key für Demo (Geoloc)
         navigator.geolocation.getCurrentPosition(async p => {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true`);
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true&hourly=rain`);
             const data = await res.json();
-            document.getElementById('weather-desc').innerText = `${data.current_weather.temperature}°C - Wind: ${data.current_weather.windspeed}km/h`;
+            const temp = data.current_weather.temperature;
+            const wind = data.current_weather.windspeed;
+            const isRain = data.current_weather.weathercode > 50;
+
+            const box = document.getElementById('weather-box');
+            box.innerHTML = `🌡️ ${temp}°C | 💨 ${wind}km/h | ${isRain ? '🌧️ Regen' : '☀️ Trocken'}`;
+            
+            const rec = document.getElementById('ride-recommendation');
+            if(temp > 12 && !isRain) { rec.innerText = "✅ Empfehlung: Ab auf die Straße!"; rec.style.color = "var(--main-color)"; }
+            else if(temp > 5 && !isRain) { rec.innerText = "⚠️ Kurze Runde okay, pass auf!"; rec.style.color = "yellow"; }
+            else { rec.innerText = "❌ Heute lieber nicht fahren."; rec.style.color = "red"; }
         });
     }
 
-    function saveService() {
-        const cur = document.getElementById('input-km').value;
-        const next = document.getElementById('input-next').value;
-        if(cur && next) {
-            localStorage.setItem('service', JSON.stringify({cur, next}));
-            renderService();
-        }
+    // Logbuch
+    function addLog(type) {
+        const km = parseInt(document.getElementById('log-km' + (type==='car'?'-car':'')).value);
+        const fun = document.getElementById('log-fun')?.value || 5;
+        const kiComment = fun > 8 ? "KI: Wahnsinn! Das war Adrenalin pur." : "KI: Entspannte Tour, gut für den Motor.";
+        
+        const entry = { id: Date.now(), km, fun, kiComment, date: new Date().toLocaleDateString() };
+        db[type].logs.push(entry);
+        db[type].km += km; // Auto-Add to KM
+        saveDB();
+        renderLogs(type);
+        updateService(type);
     }
 
-    function renderService() {
-        const data = JSON.parse(localStorage.getItem('service') || '{"cur":0,"next":100}');
-        const perc = Math.min((data.cur / data.next) * 100, 100);
-        document.getElementById('km-info').innerText = `${data.cur} km / ${data.next} km`;
-        document.getElementById('service-bar').style.width = perc + "%";
+    function renderLogs(type) {
+        const container = document.getElementById('log-history-' + type);
+        container.innerHTML = db[type].logs.map(l => `
+            <div class="history-item">
+                <b>${l.date}</b>: ${l.km}km | Spaß: ${l.fun}/10 km<br><i>${l.kiComment}</i>
+                <br><button class="delete-btn" onclick="deleteItem('${type}', 'logs', ${l.id})">Löschen</button>
+            </div>
+        `).join('');
     }
 
-    // 2. Physik
-    function calcPhys(val) {
-        document.getElementById('lean-val').innerText = Math.round(val / 3); // Vereinfacht
-        document.getElementById('bike').style.transform = `rotate(${val/3}deg)`;
+    // Service
+    function updateService(type) {
+        const current = db[type].km;
+        const target = 15000; // Beispiel Intervall
+        const perc = Math.min((current / target) * 100, 100);
+        document.getElementById('serv-bar-' + type).style.width = perc + "%";
+        document.getElementById('serv-text-' + type).innerText = `Service fällig bei ${target} km (Status: ${current} km)`;
+        document.getElementById('serv-km-' + type).value = current;
     }
 
-    // 3. Tank-Historie
-    function saveFuel() {
-        const km = document.getElementById('fuel-km').value;
-        const l = document.getElementById('fuel-l').value;
-        let logs = JSON.parse(localStorage.getItem('fuelLogs') || '[]');
-        logs.push({km, l, date: new Date().toLocaleDateString()});
-        localStorage.setItem('fuelLogs', JSON.stringify(logs));
-        renderFuel();
+    function setCleanDate(type) {
+        db[type].clean = new Date().toLocaleDateString();
+        saveDB();
+        document.getElementById('clean-date-' + type).innerText = db[type].clean;
     }
 
-    function renderFuel() {
-        let logs = JSON.parse(localStorage.getItem('fuelLogs') || '[]');
-        document.getElementById('fuel-history').innerHTML = logs.map(log => `<div>${log.date}: ${log.km}km - ${log.l}L</div>`).join('');
+    // KI Tank-Simulation
+    function simulateAI(type) {
+        setTimeout(() => {
+            const price = (Math.random() * 50 + 40).toFixed(2);
+            document.getElementById('tank-price').value = price;
+            document.getElementById('tank-loc').value = "KI-Scan: Shell Station";
+            alert("KI hat den Beleg gescannt: " + price + "€ erkannt.");
+        }, 1000);
     }
 
-    // 4. Garage
-    function saveBike() {
-        const name = document.getElementById('bike-name').value;
-        localStorage.setItem('bikeName', name);
-        renderBike();
+    function addTank(type) {
+        const p = document.getElementById('tank-price').value;
+        const l = document.getElementById('tank-loc').value;
+        db[type].tank.push({ id: Date.now(), p, l, date: new Date().toLocaleDateString() });
+        saveDB();
+        renderTank(type);
     }
 
-    function renderBike() {
-        document.getElementById('bike-display').innerText = "Aktuelles Bike: " + (localStorage.getItem('bikeName') || "Keins");
+    function renderTank(type) {
+        const container = document.getElementById('tank-history-' + type);
+        container.innerHTML = db[type].tank.map(t => `
+            <div class="history-item">${t.date}: ${t.p}€ @ ${t.l} 
+            <button class="delete-btn" onclick="deleteItem('${type}', 'tank', ${t.id})">Löschen</button></div>
+        `).join('');
     }
 
-    function checkGear() {
-        const count = document.querySelectorAll('input[type="checkbox"]:checked').length;
-        document.getElementById('gear-status').innerText = count === 3 ? "✅ Ready to Ride!" : "❌ Check unvollständig";
+    // Checkliste
+    function quittieren(type) {
+        db[type].check = "Zuletzt geprüft: " + new Date().toLocaleDateString();
+        saveDB();
+        document.getElementById('check-date-' + type).innerText = db[type].check;
     }
 
-    window.onload = () => { renderService(); renderFuel(); renderBike(); };
+    function resetCheck(type) {
+        db[type].check = "-";
+        saveDB();
+        document.getElementById('check-date-' + type).innerText = "-";
+        document.querySelectorAll(`#check-list-${type} input`).forEach(i => i.checked = false);
+    }
+
+    // Physik
+    function calcLean(v) {
+        document.getElementById('v-val').innerText = v;
+        const angle = Math.min(v / 4, 55);
+        document.getElementById('bike-icon').style.transform = `rotate(${angle}deg)`;
+        document.getElementById('lean-val').innerText = Math.round(angle);
+    }
+
+    // Einstellungen & Theme
+    function changeTheme(color) {
+        document.documentElement.style.setProperty('--main-color', color);
+        db.theme = color;
+        saveDB();
+    }
+
+    function saveFleet() {
+        db.bike.name = document.getElementById('set-bike-name').value;
+        db.car.name = document.getElementById('set-car-name').value;
+        saveDB();
+        location.reload();
+    }
+
+    function deleteItem(type, category, id) {
+        db[type][category] = db[type][category].filter(i => i.id !== id);
+        saveDB();
+        location.reload();
+    }
+
+    // Init
+    window.onload = () => {
+        changeTheme(db.theme);
+        document.getElementById('bike-name-display').innerText = db.bike.name;
+        document.getElementById('car-name-display').innerText = db.car.name;
+        document.getElementById('clean-date-bike').innerText = db.bike.clean;
+        document.getElementById('check-date-bike').innerText = db.bike.check;
+        updateWeather();
+        renderLogs('bike'); renderLogs('car');
+        renderTank('bike');
+        updateService('bike'); updateService('car');
+    };
 </script>
 </body>
 </html>
