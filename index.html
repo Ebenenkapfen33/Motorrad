@@ -3,236 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Rider Suite - All-in-One</title>
-    
+    <title>Ultimate Biker Suite</title>
     <style>
-        /* CSS BEREICH */
-        :root {
-            --bg: #0a0a0a;
-            --card: #1c1c1c;
-            --accent: #ff4d00;
-            --text: #ffffff;
-            --success: #39ff14;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        header { 
-            padding: 15px; 
-            text-align: center; 
-            border-bottom: 2px solid var(--accent);
-            background: #000;
-        }
-
-        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; }
-
-        main { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-
-        .view { padding: 20px; }
+        :root { --bg: #0a0a0a; --card: #1c1c1c; --accent: #ff4d00; --text: #eee; --green: #39ff14; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { padding: 10px; text-align: center; border-bottom: 2px solid var(--accent); background: #000; }
+        main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+        .view { padding: 15px; }
         .hidden { display: none; }
-
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        .input-group { margin-bottom: 15px; }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #333;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        .btn-action, .btn-sos {
-            width: 100%; padding: 15px; border: none; border-radius: 8px; 
-            font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s;
-        }
-        .btn-action { background: var(--accent); color: white; margin-top: 10px; }
-        .btn-sos { background: #d00; color: white; }
-        .btn-action:active { transform: scale(0.98); opacity: 0.8; }
-
-        .progress-container { background: #333; height: 12px; border-radius: 6px; margin: 15px 0 5px 0; }
-        .progress-fill { background: var(--success); height: 100%; border-radius: 6px; transition: 1s ease-out; width: 0%; }
-
-        .bike-display { 
-            height: 120px; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; font-size: 60px; 
-            margin: 20px 0;
-        }
-        #bike-icon { transition: transform 0.3s ease; transform-origin: bottom center; }
-        .ground-line { width: 120px; height: 3px; background: #555; border-radius: 2px; }
-
-        .tab-bar {
-            position: fixed; bottom: 0; width: 100%; display: flex; 
-            background: #000; padding: 10px 0; border-top: 1px solid #222;
-            justify-content: space-around;
-        }
-        .tab-bar button { 
-            background: none; border: none; color: #888; 
-            font-size: 0.7rem; cursor: pointer; flex: 1;
-        }
-        .tab-bar button.active { color: var(--accent); font-weight: bold; }
+        .card { background: var(--card); border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        input, select { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; margin-top: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--accent); color: white; }
+        .progress { background: #333; height: 8px; border-radius: 4px; margin-top: 10px; }
+        .progress-fill { background: var(--green); height: 100%; border-radius: 4px; width: 0%; transition: 0.5s; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; padding: 10px 0; }
+        .tab-bar button { background: none; flex: 1; margin: 0; font-size: 0.7rem; color: #888; }
+        .tab-bar button.active { color: var(--accent); }
+        .history-list { font-size: 0.8rem; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; }
+        .gear-visual { display: flex; gap: 5px; height: 50px; align-items: flex-end; margin-top: 10px; }
+        .gear-bar { background: var(--accent); flex: 1; text-align: center; font-size: 10px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>APEX <span id="view-title" style="color:var(--accent)">DASHBOARD</span></h1>
-    </header>
+<header><h1 id="title">BIKER DASHBOARD</h1></header>
 
-    <main id="app-content">
-        <section id="dashboard" class="view">
-            <div class="card">
-                <h3>Bike Status</h3>
-                <p id="service-info" style="margin:0">Kilometerstand: --</p>
-                <div class="progress-container">
-                    <div id="service-bar" class="progress-fill"></div>
-                </div>
-                <small style="color:#888">Nächster Service: 15.000 km</small>
+<main>
+    <section id="dash" class="view">
+        <div class="card">
+            <h3>Wetter Live</h3>
+            <button onclick="updateWeather()">Wetter aktualisieren</button>
+            <p id="weather-desc">Klicke zum Laden...</p>
+        </div>
+        <div class="card">
+            <h3>Service-Status</h3>
+            <p id="km-info">Aktuell: 0 km / Ziel: 0 km</p>
+            <div class="progress"><div id="service-bar" class="progress-fill"></div></div>
+            <input type="number" id="input-km" placeholder="Aktueller km-Stand">
+            <input type="number" id="input-next" placeholder="Service bei (km)">
+            <button onclick="saveService()">Speichern</button>
+        </div>
+    </section>
+
+    <section id="phys" class="view hidden">
+        <div class="card">
+            <h3>Schräglage: <span id="lean-val">0</span>°</h3>
+            <input type="range" min="10" max="150" value="50" oninput="calcPhys(this.value)">
+            <div id="bike" style="font-size: 40px; text-align: center; transition: 0.3s;">🏍️</div>
+        </div>
+        <div class="card">
+            <h3>Gang-Visualisierer</h3>
+            <p>V-Max pro Gang (Beispiel-Setup):</p>
+            <div class="gear-visual" id="gear-container">
+                <div class="gear-bar" style="height: 20%">1.</div>
+                <div class="gear-bar" style="height: 40%">2.</div>
+                <div class="gear-bar" style="height: 60%">3.</div>
+                <div class="gear-bar" style="height: 80%">4.</div>
+                <div class="gear-bar" style="height: 90%">5.</div>
+                <div class="gear-bar" style="height: 100%">6.</div>
             </div>
-            <div class="card">
-                <h3>Tour-Wetter</h3>
-                <p style="margin:0; font-size: 1.2rem;">☀️ 24°C</p>
-                <p style="color: var(--success); margin: 5px 0 0 0;">Ideal für die Hausrunde!</p>
-            </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="physics" class="view hidden">
-            <div class="card">
-                <h3>Schräglagen-Rechner</h3>
-                <div class="input-group">
-                    <label>Speed: <span id="v-val">50</span> km/h</label>
-                    <input type="range" id="speed" min="10" max="200" value="50" oninput="updatePhysics()">
-                </div>
-                <div class="input-group">
-                    <label>Radius: <span id="r-val">25</span> m</label>
-                    <input type="range" id="radius" min="5" max="100" value="25" oninput="updatePhysics()">
-                </div>
-                <div class="bike-display">
-                    <div id="bike-icon">🏍️</div>
-                    <div class="ground-line"></div>
-                </div>
-                <h2 id="lean-result" style="text-align: center; margin: 0; color: var(--accent);">0°</h2>
-            </div>
-        </section>
+    <section id="log" class="view hidden">
+        <div class="card">
+            <h3>Tankstopp eintragen</h3>
+            <input type="number" id="fuel-km" placeholder="km-Stand">
+            <input type="number" id="fuel-l" placeholder="Liter">
+            <button onclick="saveFuel()">Eintragen</button>
+            <div class="history-list" id="fuel-history">Keine Einträge</div>
+        </div>
+    </section>
 
-        <section id="fuel" class="view hidden">
-            <div class="card">
-                <h3>Sprit-Rechner</h3>
-                <input type="number" id="trip-km" placeholder="Gefahrene km (z.B. 240)">
-                <input type="number" id="trip-liters" placeholder="Liter getankt (z.B. 12)" style="margin-top:10px">
-                <button class="btn-action" onclick="calcConsumption()">BERECHNEN</button>
-                <h3 id="consumption-history" style="text-align:center; margin-top:20px; color: var(--success);"></h3>
-            </div>
-        </section>
+    <section id="garage" class="view hidden">
+        <div class="card">
+            <h3>Mein Bike</h3>
+            <input type="text" id="bike-name" placeholder="Modell (z.B. Z900)">
+            <input type="date" id="bike-date" title="Kaufdatum">
+            <button onclick="saveBike()">Bike-Daten speichern</button>
+            <p id="bike-display"></p>
+        </div>
+        <div class="card">
+            <h3>Ausrüstungs-Check</h3>
+            <label><input type="checkbox" onchange="checkGear()"> Helm (Alter < 5J?)</label><br>
+            <label><input type="checkbox" onchange="checkGear()"> Kette geschmiert?</label><br>
+            <label><input type="checkbox" onchange="checkGear()"> Reifendruck okay?</label>
+            <p id="gear-status" style="margin-top:10px"></p>
+        </div>
+    </section>
+</main>
 
-        <section id="sos" class="view hidden">
-            <div class="card" style="border-left-color: #d00; text-align: center;">
-                <h2 style="color: #d00; margin-top:0">NOTFALL INFO</h2>
-                <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
-                <p><strong>Blutgruppe:</strong> A Rh+</p>
-                <p><strong>Notfall-Kontakt:</strong> +49 151 000000</p>
-                <button class="btn-sos" onclick="getLocation()">MEIN STANDORT</button>
-                <p id="location-display" style="margin-top:15px; font-family: monospace; font-size: 0.9rem; color: #aaa;"></p>
-            </div>
-        </section>
-    </main>
+<nav class="tab-bar">
+    <button onclick="show('dash', this)" class="active">Dash</button>
+    <button onclick="show('phys', this)">Technik</button>
+    <button onclick="show('log', this)">Log</button>
+    <button onclick="show('garage', this)">Garage</button>
+</nav>
 
-    <nav class="tab-bar">
-        <button onclick="showView('dashboard', this)" class="active">🏠<br>Dash</button>
-        <button onclick="showView('physics', this)">📐<br>Lean</button>
-        <button onclick="showView('fuel', this)">⛽<br>Fuel</button>
-        <button onclick="showView('sos', this)">🆘<br>SOS</button>
-    </nav>
+<script>
+    // Navigation
+    function show(id, btn) {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.remove('hidden');
+        btn.classList.add('active');
+    }
 
-    <script>
-        /* JAVASCRIPT BEREICH */
+    // 1. Wetter & Service
+    async function updateWeather() {
+        document.getElementById('weather-desc').innerText = "Lade...";
+        // Nutzt öffentliche API ohne Key für Demo (Geoloc)
+        navigator.geolocation.getCurrentPosition(async p => {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true`);
+            const data = await res.json();
+            document.getElementById('weather-desc').innerText = `${data.current_weather.temperature}°C - Wind: ${data.current_weather.windspeed}km/h`;
+        });
+    }
 
-        // Navigation
-        function showView(viewId, btn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(viewId).classList.remove('hidden');
-            btn.classList.add('active');
-            document.getElementById('view-title').innerText = viewId.toUpperCase();
+    function saveService() {
+        const cur = document.getElementById('input-km').value;
+        const next = document.getElementById('input-next').value;
+        if(cur && next) {
+            localStorage.setItem('service', JSON.stringify({cur, next}));
+            renderService();
         }
+    }
 
-        // Schräglage (Physik)
-        function updatePhysics() {
-            const vKmh = parseFloat(document.getElementById('speed').value);
-            const r = parseFloat(document.getElementById('radius').value);
-            
-            document.getElementById('v-val').innerText = vKmh;
-            document.getElementById('r-val').innerText = r;
+    function renderService() {
+        const data = JSON.parse(localStorage.getItem('service') || '{"cur":0,"next":100}');
+        const perc = Math.min((data.cur / data.next) * 100, 100);
+        document.getElementById('km-info').innerText = `${data.cur} km / ${data.next} km`;
+        document.getElementById('service-bar').style.width = perc + "%";
+    }
 
-            const vMs = vKmh / 3.6;
-            const g = 9.81;
-            
-            // Formel: alpha = arctan(v^2 / (g * r))
-            const angleRad = Math.atan((vMs * vMs) / (g * r));
-            let angleDeg = (angleRad * 180) / Math.PI;
-            
-            // Limit für die Anzeige (mehr als 65 Grad ist meist Sturz)
-            if(angleDeg > 65) angleDeg = 65;
+    // 2. Physik
+    function calcPhys(val) {
+        document.getElementById('lean-val').innerText = Math.round(val / 3); // Vereinfacht
+        document.getElementById('bike').style.transform = `rotate(${val/3}deg)`;
+    }
 
-            document.getElementById('lean-result').innerText = Math.round(angleDeg) + "°";
-            document.getElementById('bike-icon').style.transform = `rotate(${angleDeg}deg)`;
-        }
+    // 3. Tank-Historie
+    function saveFuel() {
+        const km = document.getElementById('fuel-km').value;
+        const l = document.getElementById('fuel-l').value;
+        let logs = JSON.parse(localStorage.getItem('fuelLogs') || '[]');
+        logs.push({km, l, date: new Date().toLocaleDateString()});
+        localStorage.setItem('fuelLogs', JSON.stringify(logs));
+        renderFuel();
+    }
 
-        // Spritrechner
-        function calcConsumption() {
-            const km = document.getElementById('trip-km').value;
-            const liters = document.getElementById('trip-liters').value;
-            if(km > 0 && liters > 0) {
-                const avg = (liters / km) * 100;
-                document.getElementById('consumption-history').innerText = avg.toFixed(2) + " L / 100km";
-                localStorage.setItem('bike_consumption', avg.toFixed(2));
-            }
-        }
+    function renderFuel() {
+        let logs = JSON.parse(localStorage.getItem('fuelLogs') || '[]');
+        document.getElementById('fuel-history').innerHTML = logs.map(log => `<div>${log.date}: ${log.km}km - ${log.l}L</div>`).join('');
+    }
 
-        // GPS Standort
-        function getLocation() {
-            const out = document.getElementById('location-display');
-            if (navigator.geolocation) {
-                out.innerText = "Suche Satelliten...";
-                navigator.geolocation.getCurrentPosition(pos => {
-                    out.innerText = "LAT: " + pos.coords.latitude.toFixed(5) + "\nLON: " + pos.coords.longitude.toFixed(5);
-                }, () => {
-                    out.innerText = "GPS Zugriff verweigert.";
-                });
-            } else {
-                out.innerText = "GPS nicht unterstützt.";
-            }
-        }
+    // 4. Garage
+    function saveBike() {
+        const name = document.getElementById('bike-name').value;
+        localStorage.setItem('bikeName', name);
+        renderBike();
+    }
 
-        // Start-Animation / Setup
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('service-bar').style.width = '83%';
-                document.getElementById('service-info').innerText = 'Kilometerstand: 12.450 km';
-            }, 500);
-            updatePhysics();
-        };
-    </script>
+    function renderBike() {
+        document.getElementById('bike-display').innerText = "Aktuelles Bike: " + (localStorage.getItem('bikeName') || "Keins");
+    }
+
+    function checkGear() {
+        const count = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        document.getElementById('gear-status').innerText = count === 3 ? "✅ Ready to Ride!" : "❌ Check unvollständig";
+    }
+
+    window.onload = () => { renderService(); renderFuel(); renderBike(); };
+</script>
 </body>
 </html>
