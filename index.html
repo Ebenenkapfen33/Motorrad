@@ -5,261 +5,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Apex Fleet Hub</title>
     <style>
-        :root { --primary: #ff4d00; --bg: #000000; --card: #121212; --text: #ffffff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        header { padding: 15px; text-align: center; border-bottom: 2px solid var(--primary); background: #000; font-weight: bold; font-size: 1.2rem; }
-        
-        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
+        :root { --accent: #ff4d00; --bg: #000; --card: #121212; --text: #fff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { padding: 15px; text-align: center; border-bottom: 2px solid var(--accent); background: #000; font-weight: bold; letter-spacing: 1px; }
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
         .view { display: none; }
         .view.active { display: block; }
-        
-        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; border-left: 4px solid var(--primary); }
-        h2 { color: var(--primary); margin: 0 0 10px 0; font-size: 1rem; text-transform: uppercase; }
-        
-        input, select { width: 100%; padding: 12px; background: #1e1e1e; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 8px 0; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-delete { background: #2a2a2a; color: #ff4444; border: 1px solid #444; margin-top: 5px; padding: 6px; font-size: 12px; }
-
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; padding: 15px 0; border-top: 1px solid #222; justify-content: space-around; }
-        .nav-btn { background: none; border: none; color: #555; font-size: 1.5rem; transition: 0.3s; }
-        .nav-btn.active { color: var(--primary); transform: scale(1.2); }
-
-        .progress-container { background: #222; height: 12px; border-radius: 6px; margin: 10px 0; overflow: hidden; }
-        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: 1s ease; }
-
-        .entry { background: #1a1a1a; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; font-size: 0.9rem; }
-        .bike-visual { font-size: 60px; text-align: center; margin: 20px 0; transition: transform 0.2s; }
+        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; border-left: 4px solid var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        h2 { color: var(--accent); margin: 0 0 10px 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 8px 0; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; background: var(--accent); color: white; margin-top: 5px; }
+        .btn-del { background: #222; color: #ff4444; font-size: 0.75rem; padding: 6px; margin-top: 8px; border: 1px solid #444; width: auto; display: inline-block; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; padding: 15px 0; border-top: 1px solid #222; z-index: 1000; }
+        .nav-btn { background: none; border: none; color: #444; flex: 1; font-size: 1.6rem; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: var(--accent); transform: scale(1.1); }
+        .bar-bg { background: #222; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.8s ease-out; }
+        .entry { background: #1a1a1a; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #252525; position: relative; }
+        .ki-msg { color: #888; font-style: italic; font-size: 0.8rem; margin-top: 5px; display: block; border-left: 2px solid #444; padding-left: 8px; }
     </style>
 </head>
 <body>
 
-<header id="view-title">MOTORRAD</header>
+<header id="main-title">MOTORRAD</header>
 
-<main>
-    <div id="view-bike" class="view active">
+<main id="app-container">
+    <section id="view-bike" class="view active">
         <div class="card">
-            <h2 id="disp-bike-name">Mein Motorrad</h2>
-            <div id="weather-info">Wetter lädt...</div>
-            <p id="ride-hint" style="font-weight:bold; margin-top:5px;"></p>
+            <h2 id="name-label-bike">Mein Bike</h2>
+            <div id="weather-bike">Wetter-Check läuft...</div>
+            <div id="rec-bike" style="font-weight:bold; margin-top:5px; font-size: 0.9rem;"></div>
         </div>
 
         <div class="card">
             <h2>📝 Logbuch</h2>
-            <input type="number" id="log-km-b" placeholder="Distanz (km)">
-            <input type="number" id="log-min-b" placeholder="Dauer (Min)">
-            <select id="log-fun-b"><option value="🔥">Spaß: Absolut!</option><option value="😐">Spaß: Mittel</option></select>
-            <button class="btn-primary" onclick="saveLog('bike')">Fahrt speichern</button>
-            <div id="list-logs-bike"></div>
+            <input type="number" id="log-km-bike" placeholder="Kilometer">
+            <input type="number" id="log-min-bike" placeholder="Zeit (Min)">
+            <select id="log-fun-bike">
+                <option value="10">🔥 Adrenalin Pur</option>
+                <option value="5">😐 Ganz okay</option>
+                <option value="1">💤 Langweilig</option>
+            </select>
+            <button onclick="addLog('bike')">Eintrag speichern</button>
+            <div id="logs-bike"></div>
         </div>
 
         <div class="card">
             <h2>🔧 Service & Pflege</h2>
-            <p>KM-Stand: <span id="val-km-bike">0</span> / 15.000</p>
-            <div class="progress-container"><div id="bar-bike" class="progress-bar"></div></div>
-            <button class="btn-primary" style="background:#333" onclick="manualKM('bike')">KM-Stand anpassen</button>
-            <p style="margin-top:15px; font-size:0.8rem">Letzte Wäsche/Kette: <span id="val-clean-bike">-</span></p>
-            <button class="btn-primary" onclick="setClean('bike')">Jetzt gereinigt</button>
+            <p>Stand: <span id="km-bike">0</span> / 15.000 km</p>
+            <div class="bar-bg"><div id="bar-bike" class="bar-fill"></div></div>
+            <button style="background:#222; border:1px solid #444" onclick="adjustKM('bike')">KM manuell korrigieren</button>
+            <div style="margin-top:15px; font-size:0.85rem">
+                Pflege (Kette/Wäsche): <span id="clean-bike">-</span>
+            </div>
+            <button onclick="markClean('bike')">Heute gewaschen & Kette gefettet</button>
         </div>
 
         <div class="card">
-            <h2>⛽ Tanken (KI Beleg-Scan)</h2>
-            <input type="file" onchange="startAIScan('bike')" style="font-size: 12px;">
-            <input type="number" id="tank-val-b" placeholder="Betrag in €">
-            <input type="text" id="tank-loc-b" placeholder="Tankstelle / Ort">
-            <button class="btn-primary" onclick="saveTank('bike')">Eintrag speichern</button>
-            <div id="list-tank-bike"></div>
+            <h2>⛽ Tanken (KI-Scan)</h2>
+            <input type="file" accept="image/*" onchange="runAIScan('bike')">
+            <input type="number" id="tank-p-bike" placeholder="Betrag in €">
+            <input type="text" id="tank-l-bike" placeholder="Ort/Station">
+            <button onclick="addTank('bike')">Manuell speichern</button>
+            <div id="tanks-bike"></div>
         </div>
 
         <div class="card">
             <h2>🛡️ Ausrüstungs-Check</h2>
-            <div id="checklist-bike">
-                <label><input type="checkbox"> Helm (Alter/Zustand)</label><br>
-                <label><input type="checkbox"> Kettenspannung & Fett</label><br>
-                <label><input type="checkbox"> Reifendruck geprüft</label><br>
+            <div id="checks-bike">
+                <label><input type="checkbox"> Helm (Zustand/Visier)</label><br>
+                <label><input type="checkbox"> Kettenspannung</label><br>
+                <label><input type="checkbox"> Reifendruck</label><br>
                 <label><input type="checkbox"> Elektrik (Licht/Blinker)</label>
             </div>
-            <button class="btn-primary" onclick="setCheck('bike')">Check quittieren</button>
-            <p id="val-check-bike" style="font-size:0.7rem; color:#888; margin-top:5px"></p>
+            <button onclick="signCheck('bike')">Check quittieren</button>
+            <div id="check-res-bike" style="font-size:0.75rem; color:#888; margin-top:8px"></div>
         </div>
 
         <div class="card">
             <h2>📐 Fahrerische Daten</h2>
-            <label>Speed: <span id="range-v">50</span> km/h</label>
-            <input type="range" min="10" max="200" value="50" oninput="updateLean(this.value)">
-            <div id="bike-icon" class="bike-visual">🏍️</div>
-            <p style="text-align:center"><span id="range-deg">0</span>° Neigung</p>
+            <input type="range" min="0" max="180" value="0" oninput="leanCalc(this.value)">
+            <div id="lean-icon" style="font-size:60px; text-align:center; margin:15px; transition:0.1s">🏍️</div>
+            <p style="text-align:center; font-weight:bold"><span id="lean-deg">0</span>° Neigung</p>
         </div>
-    </div>
+    </section>
 
-    <div id="view-car" class="view">
+    <section id="view-car" class="view">
         <div class="card">
-            <h2 id="disp-car-name">Mein Auto</h2>
-            <div id="weather-info-car">Wetter-Daten identisch...</div>
+            <h2 id="name-label-car">Mein Auto</h2>
+            <div id="weather-car">Wetter wie Bike...</div>
         </div>
         <div class="card">
             <h2>📝 Logbuch</h2>
-            <input type="number" id="log-km-c" placeholder="Distanz (km)">
-            <button class="btn-primary" onclick="saveLog('car')">Fahrt speichern</button>
-            <div id="list-logs-car"></div>
+            <input type="number" id="log-km-car" placeholder="Kilometer">
+            <button onclick="addLog('car')">Fahrt speichern</button>
+            <div id="logs-car"></div>
         </div>
         <div class="card">
             <h2>🔧 Service</h2>
-            <p>KM-Stand: <span id="val-km-car">0</span> / 20.000</p>
-            <div class="progress-container"><div id="bar-car" class="progress-bar"></div></div>
-            <button class="btn-primary" onclick="setClean('car')">Wäsche quittieren</button>
+            <p>Stand: <span id="km-car">0</span> / 20.000 km</p>
+            <div class="bar-bg"><div id="bar-car" class="bar-fill"></div></div>
+            <button onclick="markClean('car')">Wäsche quittieren</button>
         </div>
         <div class="card">
-            <h2>⛽ Tank-Historie</h2>
-            <div id="list-tank-car"></div>
+            <h2>⛽ Tanken</h2>
+            <div id="tanks-car"></div>
         </div>
-    </div>
+    </section>
 
-    <div id="view-settings" class="view">
+    <section id="view-set" class="view">
         <div class="card">
-            <h2>🎨 App-Farbe</h2>
-            <input type="color" id="color-ctrl" onchange="updateTheme(this.value)">
+            <h2>🎨 Farbeinstellungen</h2>
+            <input type="color" id="color-pick" onchange="updateColor(this.value)">
         </div>
         <div class="card">
-            <h2>🏎️ Mein Fuhrpark</h2>
-            <input type="text" id="set-bike-n" placeholder="Name Motorrad">
-            <input type="text" id="set-car-n" placeholder="Name Auto">
-            <button class="btn-primary" onclick="saveNames()">Namen speichern</button>
+            <h2>🏎️ Fuhrpark Management</h2>
+            <input type="text" id="in-bike-name" placeholder="Name Motorrad">
+            <input type="text" id="in-car-name" placeholder="Name Auto">
+            <button onclick="saveFleet()">Namen speichern</button>
         </div>
-        <div class="card" style="border-left-color: #f00;">
-            <h2>Gefahrenzone</h2>
-            <button class="btn-delete" style="width:100%; padding:15px;" onclick="resetAll()">ALLE DATEN LÖSCHEN</button>
-        </div>
-    </div>
+        <button class="btn-del" style="width:100%; padding:15px; background:#f00; color:#fff" onclick="clearData()">ALLE DATEN LÖSCHEN</button>
+    </section>
 </main>
 
 <nav class="nav">
-    <button onclick="changeTab('bike')" id="nav-bike" class="nav-btn active">🏍️</button>
-    <button onclick="changeTab('car')" id="nav-car" class="nav-btn">🚗</button>
-    <button onclick="changeTab('settings')" id="nav-settings" class="nav-btn">⚙️</button>
+    <button onclick="showTab('bike')" id="nav-bike" class="nav-btn active">🏍️</button>
+    <button onclick="showTab('car')" id="nav-car" class="nav-btn">🚗</button>
+    <button onclick="showTab('set')" id="nav-set" class="nav-btn">⚙️</button>
 </nav>
 
 <script>
-    // Zentraler State
-    let app = JSON.parse(localStorage.getItem('apex_fleet_data')) || {
+    // Robustes Daten-Management
+    let db = JSON.parse(localStorage.getItem('apex_fleet_v1')) || {
         bike: { name: "Motorrad", km: 0, logs: [], tanks: [], clean: "-", check: "-" },
         car: { name: "Auto", km: 0, logs: [], tanks: [], clean: "-", check: "-" },
-        theme: "#ff4d00"
+        ui: { color: "#ff4d00" }
     };
 
-    function sync() { localStorage.setItem('apex_fleet_data', JSON.stringify(app)); refreshUI(); }
+    function sync() { 
+        localStorage.setItem('apex_fleet_v1', JSON.stringify(db)); 
+        render(); 
+    }
 
-    // Navigation
-    function changeTab(tab) {
+    // Tab-Steuerung
+    function showTab(tab) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('view-' + tab).classList.add('active');
         document.getElementById('nav-' + tab).classList.add('active');
-        document.getElementById('view-title').innerText = tab.toUpperCase();
+        document.getElementById('main-title').innerText = tab.toUpperCase();
     }
 
-    // Wetter (Open-Meteo)
-    async function fetchWeather() {
-        navigator.geolocation.getCurrentPosition(async pos => {
+    // Wetter & Empfehlung
+    async function initWeather() {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true`);
                 const data = await res.json();
-                const temp = data.current_weather.temperature;
-                const info = `📍 ${temp}°C | Wind: ${data.current_weather.windspeed} km/h`;
-                document.getElementById('weather-info').innerText = info;
-                document.getElementById('weather-info-car').innerText = info;
-                document.getElementById('ride-hint').innerText = temp > 12 ? "✅ Top Wetter für eine Tour!" : "⚠️ Ziemlich kalt, pass auf!";
-            } catch(e) { console.error("Weather failed"); }
+                const t = data.current_weather.temperature;
+                const info = `🌡️ ${t}°C | 💨 ${data.current_weather.windspeed} km/h`;
+                document.getElementById('weather-bike').innerText = info;
+                document.getElementById('weather-car').innerText = info;
+                document.getElementById('rec-bike').innerText = t > 12 ? "✅ Beste Bedingungen!" : "⚠️ Heute lieber vorsichtig.";
+            } catch (e) { document.getElementById('weather-bike').innerText = "Wetter-Service offline"; }
         });
     }
 
-    // Logbuch
-    function saveLog(type) {
-        const kmIn = document.getElementById(type === 'bike' ? 'log-km-b' : 'log-km-c');
+    // Logbuch mit KI-Kommentar
+    function addLog(type) {
+        const kmIn = document.getElementById('log-km-' + type);
         const km = parseInt(kmIn.value) || 0;
-        if(km === 0) return;
+        const fun = document.getElementById('log-fun-bike')?.value || 5;
+        
+        let aiMsg = "KI: Gute Fahrt!";
+        if(km > 100) aiMsg = "KI: Respekt, das war eine ordentliche Tour!";
+        if(fun > 8) aiMsg = "KI: Man merkt den Spaß am Gasgriff!";
+        if(km < 10) aiMsg = "KI: Nur mal kurz um den Block?";
 
-        const entry = {
-            id: Date.now(),
-            km: km,
-            date: new Date().toLocaleDateString(),
-            fun: document.getElementById('log-fun-b')?.value || "🚗",
-            ai: km > 100 ? "KI: Krass, eine große Reise!" : "KI: Schöne Hausrunde."
-        };
-
-        app[type].logs.unshift(entry);
-        app[type].km += km;
+        db[type].logs.unshift({ id: Date.now(), km, date: new Date().toLocaleDateString(), fun, aiMsg });
+        db[type].km += km;
         kmIn.value = "";
         sync();
     }
 
-    // Tanken & KI Scan
-    function startAIScan(type) {
-        alert("KI-Modell 'Veo-Scan' analysiert den Beleg...");
+    // KI Tank Scan Simulation
+    function runAIScan(type) {
+        alert("KI-Modell 'Gemini-Flash' liest Beleg aus...");
         setTimeout(() => {
-            document.getElementById('tank-val-b').value = (Math.random() * 45 + 15).toFixed(2);
-            document.getElementById('tank-loc-b').value = "KI: Tankstelle erkannt";
+            document.getElementById('tank-p-' + type).value = (Math.random() * 35 + 15).toFixed(2);
+            document.getElementById('tank-l-' + type).value = "KI: Shell Station";
         }, 1500);
     }
 
-    function saveTank(type) {
-        const val = document.getElementById('tank-val-b').value;
-        const loc = document.getElementById('tank-loc-b').value;
-        if(!val) return;
-        app[type].tanks.unshift({ id: Date.now(), val, loc, date: new Date().toLocaleDateString() });
+    function addTank(type) {
+        const p = document.getElementById('tank-p-' + type).value;
+        const l = document.getElementById('tank-l-' + type).value;
+        if(p) {
+            db[type].tanks.unshift({ id: Date.now(), p, l, date: new Date().toLocaleDateString() });
+            sync();
+        }
+    }
+
+    // Löschen
+    function removeItem(type, cat, id) {
+        db[type][cat] = db[type][cat].filter(i => i.id !== id);
         sync();
     }
 
-    // Hilfsfunktionen
-    function del(type, cat, id) { app[type][cat] = app[type][cat].filter(i => i.id !== id); sync(); }
-    function manualKM(type) { const n = prompt("KM-Stand korrigieren:", app[type].km); if(n) { app[type].km = parseInt(n); sync(); } }
-    function setClean(type) { app[type].clean = new Date().toLocaleDateString(); sync(); }
-    function setCheck(type) { app[type].check = "Bestanden: " + new Date().toLocaleDateString(); sync(); }
-    function updateTheme(c) { app.theme = c; sync(); }
-    function saveNames() { 
-        app.bike.name = document.getElementById('set-bike-n').value || app.bike.name;
-        app.car.name = document.getElementById('set-car-n').value || app.car.name;
-        sync(); 
-    }
-    function resetAll() { if(confirm("Wirklich alles löschen?")) { localStorage.clear(); location.reload(); } }
-
-    function updateLean(v) {
-        const deg = Math.round(v / 4);
-        document.getElementById('range-v').innerText = v;
-        document.getElementById('range-deg').innerText = deg;
-        document.getElementById('bike-icon').style.transform = `rotate(${deg}deg)`;
+    function adjustKM(type) {
+        const val = prompt("KM-Stand manuell anpassen:", db[type].km);
+        if(val !== null) { db[type].km = parseInt(val); sync(); }
     }
 
-    // UI RENDER
-    function refreshUI() {
-        document.documentElement.style.setProperty('--primary', app.theme);
-        document.getElementById('color-ctrl').value = app.theme;
+    function markClean(type) { db[type].clean = new Date().toLocaleDateString(); sync(); }
+    function signCheck(type) { db[type].check = "Bestanden: " + new Date().toLocaleDateString(); sync(); }
+    function updateColor(c) { db.ui.color = c; sync(); }
+    function clearData() { if(confirm("Wirklich alles löschen?")) { localStorage.clear(); location.reload(); } }
+    
+    function saveFleet() {
+        db.bike.name = document.getElementById('in-bike-name').value || db.bike.name;
+        db.car.name = document.getElementById('in-car-name').value || db.car.name;
+        sync();
+    }
+
+    function leanCalc(v) {
+        const d = Math.round(v / 3.8);
+        document.getElementById('lean-icon').style.transform = `rotate(${d}deg)`;
+        document.getElementById('lean-deg').innerText = d;
+    }
+
+    // UI RENDERING
+    function render() {
+        document.documentElement.style.setProperty('--accent', db.ui.color);
+        document.getElementById('color-pick').value = db.ui.color;
 
         ['bike', 'car'].forEach(t => {
-            document.getElementById('disp-' + t + '-name').innerText = app[t].name;
-            document.getElementById('val-km-' + t).innerText = app[t].km.toLocaleString();
-            
+            document.getElementById('name-label-' + t).innerText = db[t].name;
+            document.getElementById('km-' + t).innerText = db[t].km.toLocaleString();
             const limit = t === 'bike' ? 15000 : 20000;
-            document.getElementById('bar-' + t).style.width = Math.min((app[t].km / limit) * 100, 100) + "%";
+            document.getElementById('bar-' + t).style.width = Math.min((db[t].km / limit) * 100, 100) + "%";
             
-            document.getElementById('list-logs-' + t).innerHTML = app[t].logs.map(l => `
+            // Render Logs
+            document.getElementById('logs-' + t).innerHTML = db[t].logs.map(l => `
                 <div class="entry">
-                    <b>${l.date}</b> | ${l.km} km | ${l.fun}<br><i>${l.ai}</i>
-                    <button class="btn-delete" onclick="del('${t}','logs',${l.id})">Löschen</button>
-                </div>`).join('');
+                    <b>${l.date}</b> | ${l.km} km<br>
+                    <span class="ki-msg">${l.aiMsg}</span>
+                    <button class="btn-del" onclick="removeItem('${t}','logs',${l.id})">Löschen</button>
+                </div>
+            `).join('');
 
-            document.getElementById('list-tank-' + t).innerHTML = app[t].tanks.map(tank => `
+            // Render Tank
+            document.getElementById('tanks-' + t).innerHTML = db[t].tanks.map(tank => `
                 <div class="entry">
-                    <b>${tank.date}</b> | ${tank.val} € | ${tank.loc}
-                    <button class="btn-delete" onclick="del('${t}','tanks',${tank.id})">Löschen</button>
-                </div>`).join('');
+                    <b>${tank.date}</b>: ${tank.p} € | ${tank.l}
+                    <button class="btn-del" onclick="removeItem('${t}','tanks',${tank.id})">Löschen</button>
+                </div>
+            `).join('');
         });
-        document.getElementById('val-clean-bike').innerText = app.bike.clean;
-        document.getElementById('val-check-bike').innerText = app.bike.check;
+        document.getElementById('clean-bike').innerText = db.bike.clean;
+        document.getElementById('check-res-bike').innerText = db.bike.check;
     }
 
-    window.onload = () => { refreshUI(); fetchWeather(); };
+    window.onload = () => { render(); initWeather(); };
 </script>
 </body>
 </html>
+
