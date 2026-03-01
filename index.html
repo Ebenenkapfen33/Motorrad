@@ -2,114 +2,162 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Apex Fleet v4</title>
     <style>
-        :root { --accent: #ff4d00; --bg: #000; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
-        .card { background: #121212; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; font-size: 16px; }
-        button { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; background: #000; border-top: 1px solid #333; height: 60px; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: #666; }
-        .nav-item.active { color: var(--accent); }
-        .entry { background: #1a1a1a; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #333; }
-        .view { display: none; padding-bottom: 80px; }
+        :root { --accent: #ff4d00; --bg: #000; --card: #121212; }
+        body { font-family: sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        header { padding: 15px; text-align: center; border-bottom: 2px solid var(--accent); font-weight: bold; background: #000; }
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        
+        .view { display: none; }
         .view.active { display: block; }
+
+        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
+        h2 { color: var(--accent); font-size: 0.8rem; margin: 0 0 10px 0; text-transform: uppercase; }
+        
+        input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 5px 0 10px 0; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; border-top: 1px solid #333; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item span { font-size: 1.5rem; }
+
+        .bar-bg { background: #222; height: 8px; border-radius: 4px; margin: 10px 0; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.5s; border-radius: 4px; }
+        
+        .entry { background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 8px; border: 1px solid #222; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<h2 id="title">MOTORRAD</h2>
+<header id="h-title">MOTORRAD</header>
 
 <main>
     <div id="v-bike" class="view active">
         <div class="card">
-            <h3>KM-Logbuch</h3>
-            <input type="number" id="km-bike" placeholder="Gefahrene KM...">
-            <button onclick="doSave('bike')">SPEICHERN</button>
-            <div id="list-bike"></div>
+            <h2 id="name-b">Bike</h2>
+            <div id="w-b" style="font-size: 0.8rem; color: #888;">Wetter lädt...</div>
         </div>
         <div class="card">
-            <h3>Tanken</h3>
-            <input type="number" step="0.01" id="p-bike" placeholder="Preis (z.B. 14.92)">
-            <button onclick="doTank('bike')">TANKEN SPEICHERN</button>
-            <div id="t-list-bike"></div>
+            <h2>Logbuch</h2>
+            <input type="number" id="in-km-b" placeholder="KM eingeben" inputmode="numeric">
+            <button onclick="addLog('bike')">SPEICHERN</button>
+            <div id="list-logs-bike"></div>
+        </div>
+        <div class="card">
+            <h2>Service</h2>
+            <p style="font-size: 0.8rem;">KM-Stand: <span id="km-b">0</span> / 15.000</p>
+            <div class="bar-bg"><div id="bar-b" class="bar-fill"></div></div>
+        </div>
+        <div class="card">
+            <h2>Tanken</h2>
+            <input type="number" step="0.01" id="in-p-b" placeholder="Preis € (z.B. 14.92)" inputmode="decimal">
+            <button onclick="addTank('bike')">TANKEN SPEICHERN</button>
+            <div id="list-tanks-bike"></div>
         </div>
     </div>
 
     <div id="v-car" class="view">
         <div class="card">
-            <h3>KM-Logbuch</h3>
-            <input type="number" id="km-car" placeholder="Gefahrene KM...">
-            <button onclick="doSave('car')">SPEICHERN</button>
-            <div id="list-car"></div>
+            <h2 id="name-c">Auto</h2>
+            <div id="w-c" style="font-size: 0.8rem; color: #888;">-</div>
         </div>
         <div class="card">
-            <h3>Tanken</h3>
-            <input type="number" step="0.01" id="p-car" placeholder="Preis (z.B. 14.92)">
-            <button onclick="doTank('car')">TANKEN SPEICHERN</button>
-            <div id="t-list-car"></div>
+            <h2>Logbuch</h2>
+            <input type="number" id="in-km-c" placeholder="KM eingeben" inputmode="numeric">
+            <button onclick="addLog('car')">SPEICHERN</button>
+            <div id="list-logs-car"></div>
+        </div>
+        <div class="card">
+            <h2>Service</h2>
+            <p style="font-size: 0.8rem;">KM-Stand: <span id="km-c">0</span> / 20.000</p>
+            <div class="bar-bg"><div id="bar-c" class="bar-fill"></div></div>
+        </div>
+        <div class="card">
+            <h2>Tanken</h2>
+            <input type="number" step="0.01" id="in-p-c" placeholder="Preis €" inputmode="decimal">
+            <button onclick="addTank('car')">TANKEN SPEICHERN</button>
+            <div id="list-tanks-car"></div>
         </div>
     </div>
 </main>
 
 <div class="nav">
-    <div class="nav-item active" onclick="tab('bike', this)">BIKE</div>
-    <div class="nav-item" onclick="tab('car', this)">CAR</div>
-    <div onclick="localStorage.clear(); location.reload();" class="nav-item" style="color: red;">RESET</div>
+    <div class="nav-item active" onclick="tab('bike', this)"><span>🏍️</span>MOPED</div>
+    <div class="nav-item" onclick="tab('car', this)"><span>🚗</span>AUTO</div>
+    <div class="nav-item" onclick="resetAll()" style="color: #444;"><span>♻️</span>RESET</div>
 </div>
 
 <script>
-    // INITIALISIERUNG - Wir nutzen einen komplett neuen Key
-    const KEY = 'APEX_FINAL_DATA_RESCUE';
-    let data = JSON.parse(localStorage.getItem(KEY)) || {
-        bike: { logs: [], tanks: [] },
-        car: { logs: [], tanks: [] }
+    const KEY = 'APEX_V4_FINAL';
+    let db = JSON.parse(localStorage.getItem(KEY)) || {
+        bike: { km: 0, logs: [], tanks: [] },
+        car: { km: 0, logs: [], tanks: [] }
     };
+
+    function sync() {
+        localStorage.setItem(KEY, JSON.stringify(db));
+        render();
+    }
 
     function tab(v, el) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById('v-'+v).classList.add('active');
         el.classList.add('active');
-        document.getElementById('title').innerText = v.toUpperCase();
+        document.getElementById('h-title').innerText = v.toUpperCase();
     }
 
-    function doSave(t) {
-        const val = document.getElementById('km-'+t).value;
-        if(!val) return;
-        data[t].logs.unshift({ km: val, d: new Date().toLocaleDateString() });
-        commit();
-        document.getElementById('km-'+t).value = "";
-    }
-
-    function doTank(t) {
-        const val = document.getElementById('p-'+t).value;
-        if(!val) return;
-        data[t].tanks.unshift({ p: val, d: new Date().toLocaleDateString() });
-        commit();
-        document.getElementById('p-'+t).value = "";
-    }
-
-    function commit() {
-        try {
-            localStorage.setItem(KEY, JSON.stringify(data));
-            console.log("Gespeichert!");
-            render();
-        } catch(e) {
-            alert("FEHLER BEIM SPEICHERN: " + e);
+    function addLog(t) {
+        const input = document.getElementById('in-km-'+t);
+        const km = parseInt(input.value) || 0;
+        if(km > 0) {
+            db[t].logs.unshift({ km, d: new Date().toLocaleDateString() });
+            db[t].km += km;
+            input.value = "";
+            sync();
         }
+    }
+
+    function addTank(t) {
+        const input = document.getElementById('in-p-'+t);
+        const p = input.value;
+        if(p) {
+            db[t].tanks.unshift({ p, d: new Date().toLocaleDateString() });
+            input.value = "";
+            sync();
+        }
+    }
+
+    function resetAll() { if(confirm("Wirklich alles löschen?")) { localStorage.clear(); location.reload(); } }
+
+    async function getWeather() {
+        navigator.geolocation.getCurrentPosition(async p => {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true`);
+                const d = await res.json();
+                const out = `🌡️ ${d.current_weather.temperature}°C | 💨 ${d.current_weather.windspeed} km/h`;
+                document.getElementById('w-b').innerText = out;
+                document.getElementById('w-c').innerText = out;
+            } catch(e) {}
+        });
     }
 
     function render() {
         ['bike', 'car'].forEach(t => {
-            document.getElementById('list-'+t).innerHTML = data[t].logs.map(l => `<div class="entry">${l.d}: ${l.km} km</div>`).join('');
-            document.getElementById('t-list-'+t).innerHTML = data[t].tanks.map(tank => `<div class="entry">${tank.d}: ${tank.p} €</div>`).join('');
+            document.getElementById('km-'+t).innerText = db[t].km.toLocaleString();
+            const target = t === 'bike' ? 15000 : 20000;
+            document.getElementById('bar-'+t).style.width = Math.min((db[t].km/target)*100, 100) + "%";
+            
+            document.getElementById('list-logs-'+t).innerHTML = db[t].logs.map(l => `<div class="entry"><b>${l.d}</b>: ${l.km} km</div>`).join('');
+            document.getElementById('list-tanks-'+t).innerHTML = db[t].tanks.map(tank => `<div class="entry"><b>${tank.d}</b>: ${tank.p} €</div>`).join('');
         });
     }
 
-    render();
+    window.onload = () => { render(); getWeather(); };
 </script>
 </body>
 </html>
