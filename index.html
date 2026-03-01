@@ -2,216 +2,322 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Fleet Hub v3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Apex Fleet Hub</title>
     <style>
         :root { --accent: #ff4d00; --bg: #000; --card: #121212; --text: #eee; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        header { padding: 15px; text-align: center; border-bottom: 2px solid var(--accent); background: #000; font-weight: bold; letter-spacing: 1px; }
-        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
-        
-        .view { display: none; }
+        /* Verhindert das Scrollen des gesamten Bodys auf Android */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        body { display: flex; flex-direction: column; }
+
+        header { 
+            padding: 18px; 
+            text-align: center; 
+            border-bottom: 2px solid var(--accent); 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: #000;
+        }
+
+        main { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            /* Extra Platz unten, damit nichts von der Nav verdeckt wird */
+            padding-bottom: 100px; 
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .view { display: none; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; border-left: 4px solid var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        h2 { color: var(--accent); font-size: 0.85rem; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        input, select { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 5px 0 10px 0; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.98); opacity: 0.8; }
-        
-        .btn-del { background: #222; color: #ff4444; border: 1px solid #444; margin-top: 8px; font-size: 0.7rem; width: auto; padding: 5px 10px; }
+        .card { 
+            background: var(--card); 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid #222;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
 
-        .nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: #000; display: flex; border-top: 1px solid #333; z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; cursor: pointer; }
+        h2 { color: var(--accent); font-size: 0.8rem; margin: 0 0 15px 0; letter-spacing: 1px; }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            background: #1a1a1a; 
+            border: 2px solid #333; 
+            color: #fff; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            font-size: 16px; /* Verhindert Auto-Zoom auf Mobile */
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--accent); }
+
+        button { 
+            width: 100%; 
+            padding: 16px; 
+            background: var(--accent); 
+            color: #fff; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(255, 77, 0, 0.3);
+        }
+        button:active { transform: scale(0.97); opacity: 0.9; }
+
+        .nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            height: 75px; 
+            background: rgba(0,0,0,0.95); 
+            backdrop-filter: blur(10px);
+            display: flex; 
+            border-top: 1px solid #222; 
+            z-index: 999; 
+        }
+
+        /* Versteckt die Nav, wenn die Tastatur offen ist (Android Fix) */
+        @media screen and (max-height: 500px) {
+            .nav { display: none; }
+        }
+
+        .nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: #666; 
+            transition: 0.2s;
+        }
         .nav-item.active { color: var(--accent); }
-        .nav-item span { font-size: 1.4rem; }
+        .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-item label { font-size: 0.65rem; font-weight: bold; }
 
-        .bar-bg { background: #222; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
-        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        .entry { background: #1a1a1a; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #222; position: relative; }
-        .ki-msg { color: #888; font-style: italic; font-size: 0.8rem; margin-top: 5px; display: block; border-left: 2px solid var(--accent); padding-left: 8px; }
-        
-        .bike-anim { font-size: 50px; text-align: center; margin: 15px 0; transition: 0.1s; }
-        .weather-info { font-size: 0.9rem; color: #bbb; }
+        .entry { 
+            background: #1a1a1a; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 12px; 
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .progress-container { background: #222; height: 8px; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: 1s ease-out; }
+
+        .badge { font-size: 0.7rem; padding: 4px 8px; background: #333; border-radius: 4px; color: #aaa; align-self: flex-start; }
     </style>
 </head>
 <body>
 
-<header id="h-title">MOTORRAD</header>
+<header id="main-header">Motorrad</header>
 
 <main>
     <div id="v-bike" class="view active">
         <div class="card">
-            <h2 id="disp-name-bike">Mein Motorrad</h2>
-            <div id="w-bike" class="weather-info">Wetter lädt...</div>
-            <div id="rec-bike" style="font-weight:bold; margin-top:5px; font-size:0.8rem"></div>
+            <h2 id="name-b">Mein Bike</h2>
+            <div id="w-b" style="color:#888; font-size:0.9rem">Wetter-Daten werden geladen...</div>
         </div>
 
         <div class="card">
-            <h2>📝 Logbuch</h2>
-            <input type="number" id="l-km-bike" placeholder="Kilometer">
-            <input type="number" id="l-min-bike" placeholder="Zeit (Minuten)">
-            <button onclick="addLog('bike')">Fahrt speichern</button>
-            <div id="list-logs-bike"></div>
+            <h2>Logbuch</h2>
+            <input type="number" id="in-km-b" placeholder="Kilometer" inputmode="numeric">
+            <input type="number" id="in-min-b" placeholder="Dauer (Minuten)" inputmode="numeric">
+            <button onclick="save('bike')">Fahrt speichern</button>
+            <div id="list-b-logs"></div>
         </div>
 
         <div class="card">
-            <h2>🔧 Service & Pflege</h2>
-            <p>KM: <span id="km-bike">0</span> / 15.000</p>
-            <div class="bar-bg"><div id="bar-bike" class="bar-fill"></div></div>
-            <p style="font-size:0.8rem">Letzte Wäsche: <span id="cl-bike">-</span></p>
-            <button onclick="setClean('bike')">Jetzt gereinigt</button>
+            <h2>Service Status</h2>
+            <p style="margin:0; font-size:0.9rem">KM: <span id="km-disp-b">0</span> / 15.000</p>
+            <div class="progress-container"><div id="bar-b" class="progress-bar"></div></div>
+            <button style="background:#222; margin-top:10px;" onclick="resetKM('bike')">KM-Stand korrigieren</button>
         </div>
 
         <div class="card">
-            <h2>⛽ Tanken</h2>
-            <input type="number" step="0.01" id="t-p-bike" placeholder="Preis in € (z.B. 14.92)">
-            <input type="text" id="t-l-bike" placeholder="Ort/Tankstelle">
-            <button onclick="addTank('bike')">Tanken speichern</button>
-            <div id="list-tanks-bike"></div>
-        </div>
-
-        <div class="card">
-            <h2>📐 Schräglage</h2>
-            <input type="range" min="0" max="180" value="0" oninput="doLean(this.value)">
-            <div id="bike-icon" class="bike-anim">🏍️</div>
-            <p style="text-align:center; font-size:0.8rem;"><span id="lean-deg">0</span>° Neigung</p>
+            <h2>Tanken</h2>
+            <input type="number" step="0.01" id="in-p-b" placeholder="Preis (€, z.B. 14.92)" inputmode="decimal">
+            <button onclick="saveTank('bike')">Tanken speichern</button>
+            <div id="list-b-tanks"></div>
         </div>
     </div>
 
     <div id="v-car" class="view">
         <div class="card">
-            <h2 id="disp-name-car">Mein Auto</h2>
-            <div id="w-car" class="weather-info">Wetter lädt...</div>
+            <h2 id="name-c">Mein Auto</h2>
+            <div id="w-c" style="color:#888; font-size:0.9rem">-</div>
         </div>
         <div class="card">
-            <h2>📝 Logbuch</h2>
-            <input type="number" id="l-km-car" placeholder="Kilometer">
-            <button onclick="addLog('car')">Fahrt speichern</button>
-            <div id="list-logs-car"></div>
+            <h2>Logbuch</h2>
+            <input type="number" id="in-km-c" placeholder="Kilometer" inputmode="numeric">
+            <button onclick="save('car')">Fahrt speichern</button>
+            <div id="list-c-logs"></div>
         </div>
         <div class="card">
-            <h2>🔧 Service</h2>
-            <p>KM: <span id="km-car">0</span> / 20.000</p>
-            <div class="bar-bg"><div id="bar-car" class="bar-fill"></div></div>
-            <button onclick="setClean('car')">Wäsche quittieren</button>
+            <h2>Service Status</h2>
+            <p style="margin:0; font-size:0.9rem">KM: <span id="km-disp-c">0</span> / 20.000</p>
+            <div class="progress-container"><div id="bar-c" class="progress-bar"></div></div>
         </div>
         <div class="card">
-            <h2>⛽ Tanken</h2>
-            <input type="number" step="0.01" id="t-p-car" placeholder="Preis €">
-            <button onclick="addTank('car')">Speichern</button>
-            <div id="list-tanks-car"></div>
+            <h2>Tanken</h2>
+            <input type="number" step="0.01" id="in-p-c" placeholder="Preis (€)" inputmode="decimal">
+            <button onclick="saveTank('car')">Tanken speichern</button>
+            <div id="list-c-tanks"></div>
         </div>
     </div>
 
     <div id="v-set" class="view">
-        <div class="card"><h2>🎨 Akzentfarbe</h2><input type="color" onchange="setTheme(this.value)" id="color-picker"></div>
-        <div class="card"><h2>🏎️ Fuhrpark Namen</h2>
-            <input type="text" id="in-b-n" placeholder="Name Bike">
-            <input type="text" id="in-c-n" placeholder="Name Auto">
-            <button onclick="saveNames()">Namen speichern</button>
+        <div class="card">
+            <h2>Farbe & Design</h2>
+            <input type="color" onchange="updateColor(this.value)" id="color-p">
         </div>
-        <button class="btn-del" style="width:100%; padding:15px; background:#f00; color:#fff" onclick="resetAll()">KOMPLETT-RESET</button>
+        <div class="card">
+            <h2>Namen</h2>
+            <input type="text" id="set-n-b" placeholder="Name Bike">
+            <input type="text" id="set-n-c" placeholder="Name Auto">
+            <button onclick="updateNames()">Namen speichern</button>
+        </div>
+        <button style="background:#cc0000;" onclick="clearAll()">Komplett-Reset</button>
     </div>
 </main>
 
 <div class="nav">
-    <div class="nav-item active" onclick="tab('bike', this)"><span>🏍️</span><label>Bike</label></div>
-    <div class="nav-item" onclick="tab('car', this)"><span>🚗</span><label>Auto</label></div>
-    <div class="nav-item" onclick="tab('set', this)"><span>⚙️</span><label>Setup</label></div>
+    <div class="nav-item active" onclick="nav('bike', this)"><span>🏍️</span><label>Bike</label></div>
+    <div class="nav-item" onclick="nav('car', this)"><span>🚗</span><label>Auto</label></div>
+    <div class="nav-item" onclick="nav('set', this)"><span>⚙️</span><label>Setup</label></div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('apex_v3_core')) || {
-        bike: { name: "Motorrad", km: 0, logs: [], tanks: [], clean: "-" },
-        car: { name: "Auto", km: 0, logs: [], tanks: [], clean: "-" },
-        color: "#ff4d00"
+    // Robustes Daten-Management
+    let storage = {
+        bike: { name: "Motorrad", km: 0, logs: [], tanks: [] },
+        car: { name: "Auto", km: 0, logs: [], tanks: [] },
+        theme: "#ff4d00"
     };
 
-    function sync() { localStorage.setItem('apex_v3_core', JSON.stringify(db)); render(); }
+    function loadData() {
+        const saved = localStorage.getItem('APEX_FLEET_DATA');
+        if(saved) {
+            try { storage = JSON.parse(saved); } catch(e) { console.error("Data Corrupt"); }
+        }
+        render();
+    }
 
-    function tab(v, el) {
+    function sync() {
+        localStorage.setItem('APEX_FLEET_DATA', JSON.stringify(storage));
+        if(window.navigator.vibrate) window.navigator.vibrate(20); // Haptisches Feedback
+        render();
+    }
+
+    function nav(v, el) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById('v-'+v).classList.add('active');
         el.classList.add('active');
-        document.getElementById('h-title').innerText = v.toUpperCase();
+        document.getElementById('main-header').innerText = v === 'set' ? 'Setup' : storage[v].name;
     }
 
-    async function initWeather() {
-        navigator.geolocation.getCurrentPosition(async p => {
-            try {
-                const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true`);
-                const d = await r.json();
-                const t = d.current_weather.temperature;
-                const txt = `🌡️ ${t}°C | 💨 ${d.current_weather.windspeed} km/h`;
-                document.getElementById('w-bike').innerText = txt;
-                document.getElementById('w-car').innerText = txt;
-                document.getElementById('rec-bike').innerText = t > 12 ? "✅ Perfektes Bike-Wetter!" : "⚠️ Ziemlich frisch heute.";
-            } catch(e) { console.log("Weather error"); }
-        });
-    }
-
-    function addLog(t) {
-        const kmVal = document.getElementById('l-km-'+t).value;
-        const minVal = document.getElementById('l-min-'+t)?.value || "";
-        const km = parseInt(kmVal) || 0;
+    function save(t) {
+        const kmIn = document.getElementById('in-km-'+t);
+        const minIn = document.getElementById('in-min-'+t);
+        const km = parseInt(kmIn.value) || 0;
         if(km > 0) {
-            let ai = km > 100 ? "KI: Kranke Tour, Respekt!" : "KI: Schöne Runde!";
-            db[t].logs.unshift({ id: Date.now(), km, min: minVal, d: new Date().toLocaleDateString(), ai });
-            db[t].km += km;
-            document.getElementById('l-km-'+t).value = "";
-            if(document.getElementById('l-min-'+t)) document.getElementById('l-min-'+t).value = "";
+            storage[t].logs.unshift({
+                id: Date.now(),
+                km: km,
+                min: minIn ? minIn.value : null,
+                date: new Date().toLocaleDateString()
+            });
+            storage[t].km += km;
+            kmIn.value = "";
+            if(minIn) minIn.value = "";
             sync();
         }
     }
 
-    function addTank(t) {
-        const p = document.getElementById('t-p-'+t).value;
-        const l = document.getElementById('t-l-'+t)?.value || "Tankstelle";
-        if(p) {
-            db[t].tanks.unshift({ id: Date.now(), p: parseFloat(p).toFixed(2), l, d: new Date().toLocaleDateString() });
-            document.getElementById('t-p-'+t).value = "";
+    function saveTank(t) {
+        const pIn = document.getElementById('in-p-'+t);
+        const p = parseFloat(pIn.value) || 0;
+        if(p > 0) {
+            storage[t].tanks.unshift({
+                id: Date.now(),
+                p: p.toFixed(2),
+                date: new Date().toLocaleDateString()
+            });
+            pIn.value = "";
             sync();
         }
     }
 
-    function del(t, c, id) { db[t][c] = db[t][c].filter(x => x.id !== id); sync(); }
-    function setClean(t) { db[t].clean = new Date().toLocaleDateString(); sync(); }
-    function doLean(v) { let d = Math.round(v/4); document.getElementById('bike-icon').style.transform = `rotate(${d}deg)`; document.getElementById('lean-deg').innerText = d; }
-    function setTheme(c) { db.color = c; sync(); }
-    function saveNames() {
-        db.bike.name = document.getElementById('in-b-n').value || db.bike.name;
-        db.car.name = document.getElementById('in-c-n').value || db.car.name;
+    function resetKM(t) {
+        const n = prompt("Aktueller KM-Stand:", storage[t].km);
+        if(n !== null) { storage[t].km = parseInt(n) || 0; sync(); }
+    }
+
+    function updateColor(c) { storage.theme = c; sync(); }
+    function updateNames() {
+        storage.bike.name = document.getElementById('set-n-b').value || storage.bike.name;
+        storage.car.name = document.getElementById('set-n-c').value || storage.car.name;
         sync();
     }
-    function resetAll() { if(confirm("ALLES LÖSCHEN?")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("Wirklich alles löschen?")) { localStorage.clear(); location.reload(); } }
 
-    function render() {
-        document.documentElement.style.setProperty('--accent', db.color);
-        ['bike', 'car'].forEach(t => {
-            document.getElementById('disp-name-'+t).innerText = db[t].name;
-            document.getElementById('km-'+t).innerText = db[t].km.toLocaleString();
-            const target = t === 'bike' ? 15000 : 20000;
-            document.getElementById('bar-'+t).style.width = Math.min((db[t].km/target)*100, 100) + "%";
-            
-            document.getElementById('list-logs-'+t).innerHTML = db[t].logs.map(x => `
-                <div class="entry"><b>${x.d}</b>: ${x.km} km ${x.min ? '('+x.min+' Min)' : ''}
-                <span class="ki-msg">${x.ai}</span>
-                <button class="btn-del" onclick="del('${t}','logs',${x.id})">Löschen</button></div>`).join('');
-            
-            document.getElementById('list-tanks-'+t).innerHTML = db[t].tanks.map(x => `
-                <div class="entry"><b>${x.d}</b>: ${x.p} € @ ${x.l || 'Tankstelle'}
-                <button class="btn-del" onclick="del('${t}','tanks',${x.id})">Löschen</button></div>`).join('');
+    async function fetchWeather() {
+        navigator.geolocation.getCurrentPosition(async pos => {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true`);
+            const d = await res.json();
+            const txt = `🌡️ ${d.current_weather.temperature}°C | 💨 ${d.current_weather.windspeed}km/h`;
+            document.getElementById('w-b').innerText = txt;
+            document.getElementById('w-c').innerText = txt;
         });
-        document.getElementById('cl-bike').innerText = db.bike.clean;
     }
 
-    window.onload = () => { render(); initWeather(); };
+    function render() {
+        document.documentElement.style.setProperty('--accent', storage.theme);
+        ['bike', 'car'].forEach(t => {
+            document.getElementById('km-disp-'+t).innerText = storage[t].km.toLocaleString();
+            const target = t === 'bike' ? 15000 : 20000;
+            document.getElementById('bar-'+t).style.width = Math.min((storage[t].km/target)*100, 100) + "%";
+            
+            // Render Logs
+            const logHTML = storage[t].logs.map(l => `
+                <div class="entry">
+                    <span class="badge">${l.date}</span>
+                    <span style="font-weight:bold">${l.km} km ${l.min ? ' | '+l.min+' Min' : ''}</span>
+                </div>`).join('');
+            document.getElementById('list-'+t+'-logs').innerHTML = logHTML;
+
+            // Render Tanks
+            const tankHTML = storage[t].tanks.map(tank => `
+                <div class="entry">
+                    <span class="badge">${tank.date}</span>
+                    <span style="color:var(--accent); font-weight:bold">${tank.p} €</span>
+                </div>`).join('');
+            document.getElementById('list-'+t+'-tanks').innerHTML = tankHTML;
+        });
+    }
+
+    window.onload = () => { loadData(); fetchWeather(); };
 </script>
+
 </body>
 </html>
