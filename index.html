@@ -2,322 +2,114 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Apex Fleet Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Fix</title>
     <style>
-        :root { --accent: #ff4d00; --bg: #000; --card: #121212; --text: #eee; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        /* Verhindert das Scrollen des gesamten Bodys auf Android */
-        html, body { 
-            height: 100%; 
-            margin: 0; 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-        }
-
-        body { display: flex; flex-direction: column; }
-
-        header { 
-            padding: 18px; 
-            text-align: center; 
-            border-bottom: 2px solid var(--accent); 
-            font-weight: 800; 
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: #000;
-        }
-
-        main { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            /* Extra Platz unten, damit nichts von der Nav verdeckt wird */
-            padding-bottom: 100px; 
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .view { display: none; animation: fadeIn 0.3s ease; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .card { 
-            background: var(--card); 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border: 1px solid #222;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-
-        h2 { color: var(--accent); font-size: 0.8rem; margin: 0 0 15px 0; letter-spacing: 1px; }
-
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            background: #1a1a1a; 
-            border: 2px solid #333; 
-            color: #fff; 
-            border-radius: 10px; 
-            margin-bottom: 15px; 
-            font-size: 16px; /* Verhindert Auto-Zoom auf Mobile */
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--accent); }
-
-        button { 
-            width: 100%; 
-            padding: 16px; 
-            background: var(--accent); 
-            color: #fff; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            font-size: 1rem;
-            box-shadow: 0 4px 10px rgba(255, 77, 0, 0.3);
-        }
-        button:active { transform: scale(0.97); opacity: 0.9; }
-
-        .nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            height: 75px; 
-            background: rgba(0,0,0,0.95); 
-            backdrop-filter: blur(10px);
-            display: flex; 
-            border-top: 1px solid #222; 
-            z-index: 999; 
-        }
-
-        /* Versteckt die Nav, wenn die Tastatur offen ist (Android Fix) */
-        @media screen and (max-height: 500px) {
-            .nav { display: none; }
-        }
-
-        .nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            color: #666; 
-            transition: 0.2s;
-        }
+        :root { --accent: #ff4d00; --bg: #000; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
+        .card { background: #121212; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; background: #000; border-top: 1px solid #333; height: 60px; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: #666; }
         .nav-item.active { color: var(--accent); }
-        .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
-        .nav-item label { font-size: 0.65rem; font-weight: bold; }
-
-        .entry { 
-            background: #1a1a1a; 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-top: 12px; 
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .progress-container { background: #222; height: 8px; border-radius: 4px; margin: 10px 0; overflow: hidden; }
-        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: 1s ease-out; }
-
-        .badge { font-size: 0.7rem; padding: 4px 8px; background: #333; border-radius: 4px; color: #aaa; align-self: flex-start; }
+        .entry { background: #1a1a1a; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #333; }
+        .view { display: none; padding-bottom: 80px; }
+        .view.active { display: block; }
     </style>
 </head>
 <body>
 
-<header id="main-header">Motorrad</header>
+<h2 id="title">MOTORRAD</h2>
 
 <main>
     <div id="v-bike" class="view active">
         <div class="card">
-            <h2 id="name-b">Mein Bike</h2>
-            <div id="w-b" style="color:#888; font-size:0.9rem">Wetter-Daten werden geladen...</div>
+            <h3>KM-Logbuch</h3>
+            <input type="number" id="km-bike" placeholder="Gefahrene KM...">
+            <button onclick="doSave('bike')">SPEICHERN</button>
+            <div id="list-bike"></div>
         </div>
-
         <div class="card">
-            <h2>Logbuch</h2>
-            <input type="number" id="in-km-b" placeholder="Kilometer" inputmode="numeric">
-            <input type="number" id="in-min-b" placeholder="Dauer (Minuten)" inputmode="numeric">
-            <button onclick="save('bike')">Fahrt speichern</button>
-            <div id="list-b-logs"></div>
-        </div>
-
-        <div class="card">
-            <h2>Service Status</h2>
-            <p style="margin:0; font-size:0.9rem">KM: <span id="km-disp-b">0</span> / 15.000</p>
-            <div class="progress-container"><div id="bar-b" class="progress-bar"></div></div>
-            <button style="background:#222; margin-top:10px;" onclick="resetKM('bike')">KM-Stand korrigieren</button>
-        </div>
-
-        <div class="card">
-            <h2>Tanken</h2>
-            <input type="number" step="0.01" id="in-p-b" placeholder="Preis (€, z.B. 14.92)" inputmode="decimal">
-            <button onclick="saveTank('bike')">Tanken speichern</button>
-            <div id="list-b-tanks"></div>
+            <h3>Tanken</h3>
+            <input type="number" step="0.01" id="p-bike" placeholder="Preis (z.B. 14.92)">
+            <button onclick="doTank('bike')">TANKEN SPEICHERN</button>
+            <div id="t-list-bike"></div>
         </div>
     </div>
 
     <div id="v-car" class="view">
         <div class="card">
-            <h2 id="name-c">Mein Auto</h2>
-            <div id="w-c" style="color:#888; font-size:0.9rem">-</div>
+            <h3>KM-Logbuch</h3>
+            <input type="number" id="km-car" placeholder="Gefahrene KM...">
+            <button onclick="doSave('car')">SPEICHERN</button>
+            <div id="list-car"></div>
         </div>
         <div class="card">
-            <h2>Logbuch</h2>
-            <input type="number" id="in-km-c" placeholder="Kilometer" inputmode="numeric">
-            <button onclick="save('car')">Fahrt speichern</button>
-            <div id="list-c-logs"></div>
+            <h3>Tanken</h3>
+            <input type="number" step="0.01" id="p-car" placeholder="Preis (z.B. 14.92)">
+            <button onclick="doTank('car')">TANKEN SPEICHERN</button>
+            <div id="t-list-car"></div>
         </div>
-        <div class="card">
-            <h2>Service Status</h2>
-            <p style="margin:0; font-size:0.9rem">KM: <span id="km-disp-c">0</span> / 20.000</p>
-            <div class="progress-container"><div id="bar-c" class="progress-bar"></div></div>
-        </div>
-        <div class="card">
-            <h2>Tanken</h2>
-            <input type="number" step="0.01" id="in-p-c" placeholder="Preis (€)" inputmode="decimal">
-            <button onclick="saveTank('car')">Tanken speichern</button>
-            <div id="list-c-tanks"></div>
-        </div>
-    </div>
-
-    <div id="v-set" class="view">
-        <div class="card">
-            <h2>Farbe & Design</h2>
-            <input type="color" onchange="updateColor(this.value)" id="color-p">
-        </div>
-        <div class="card">
-            <h2>Namen</h2>
-            <input type="text" id="set-n-b" placeholder="Name Bike">
-            <input type="text" id="set-n-c" placeholder="Name Auto">
-            <button onclick="updateNames()">Namen speichern</button>
-        </div>
-        <button style="background:#cc0000;" onclick="clearAll()">Komplett-Reset</button>
     </div>
 </main>
 
 <div class="nav">
-    <div class="nav-item active" onclick="nav('bike', this)"><span>🏍️</span><label>Bike</label></div>
-    <div class="nav-item" onclick="nav('car', this)"><span>🚗</span><label>Auto</label></div>
-    <div class="nav-item" onclick="nav('set', this)"><span>⚙️</span><label>Setup</label></div>
+    <div class="nav-item active" onclick="tab('bike', this)">BIKE</div>
+    <div class="nav-item" onclick="tab('car', this)">CAR</div>
+    <div onclick="localStorage.clear(); location.reload();" class="nav-item" style="color: red;">RESET</div>
 </div>
 
 <script>
-    // Robustes Daten-Management
-    let storage = {
-        bike: { name: "Motorrad", km: 0, logs: [], tanks: [] },
-        car: { name: "Auto", km: 0, logs: [], tanks: [] },
-        theme: "#ff4d00"
+    // INITIALISIERUNG - Wir nutzen einen komplett neuen Key
+    const KEY = 'APEX_FINAL_DATA_RESCUE';
+    let data = JSON.parse(localStorage.getItem(KEY)) || {
+        bike: { logs: [], tanks: [] },
+        car: { logs: [], tanks: [] }
     };
 
-    function loadData() {
-        const saved = localStorage.getItem('APEX_FLEET_DATA');
-        if(saved) {
-            try { storage = JSON.parse(saved); } catch(e) { console.error("Data Corrupt"); }
-        }
-        render();
-    }
-
-    function sync() {
-        localStorage.setItem('APEX_FLEET_DATA', JSON.stringify(storage));
-        if(window.navigator.vibrate) window.navigator.vibrate(20); // Haptisches Feedback
-        render();
-    }
-
-    function nav(v, el) {
+    function tab(v, el) {
         document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
         document.getElementById('v-'+v).classList.add('active');
         el.classList.add('active');
-        document.getElementById('main-header').innerText = v === 'set' ? 'Setup' : storage[v].name;
+        document.getElementById('title').innerText = v.toUpperCase();
     }
 
-    function save(t) {
-        const kmIn = document.getElementById('in-km-'+t);
-        const minIn = document.getElementById('in-min-'+t);
-        const km = parseInt(kmIn.value) || 0;
-        if(km > 0) {
-            storage[t].logs.unshift({
-                id: Date.now(),
-                km: km,
-                min: minIn ? minIn.value : null,
-                date: new Date().toLocaleDateString()
-            });
-            storage[t].km += km;
-            kmIn.value = "";
-            if(minIn) minIn.value = "";
-            sync();
+    function doSave(t) {
+        const val = document.getElementById('km-'+t).value;
+        if(!val) return;
+        data[t].logs.unshift({ km: val, d: new Date().toLocaleDateString() });
+        commit();
+        document.getElementById('km-'+t).value = "";
+    }
+
+    function doTank(t) {
+        const val = document.getElementById('p-'+t).value;
+        if(!val) return;
+        data[t].tanks.unshift({ p: val, d: new Date().toLocaleDateString() });
+        commit();
+        document.getElementById('p-'+t).value = "";
+    }
+
+    function commit() {
+        try {
+            localStorage.setItem(KEY, JSON.stringify(data));
+            console.log("Gespeichert!");
+            render();
+        } catch(e) {
+            alert("FEHLER BEIM SPEICHERN: " + e);
         }
-    }
-
-    function saveTank(t) {
-        const pIn = document.getElementById('in-p-'+t);
-        const p = parseFloat(pIn.value) || 0;
-        if(p > 0) {
-            storage[t].tanks.unshift({
-                id: Date.now(),
-                p: p.toFixed(2),
-                date: new Date().toLocaleDateString()
-            });
-            pIn.value = "";
-            sync();
-        }
-    }
-
-    function resetKM(t) {
-        const n = prompt("Aktueller KM-Stand:", storage[t].km);
-        if(n !== null) { storage[t].km = parseInt(n) || 0; sync(); }
-    }
-
-    function updateColor(c) { storage.theme = c; sync(); }
-    function updateNames() {
-        storage.bike.name = document.getElementById('set-n-b').value || storage.bike.name;
-        storage.car.name = document.getElementById('set-n-c').value || storage.car.name;
-        sync();
-    }
-    function clearAll() { if(confirm("Wirklich alles löschen?")) { localStorage.clear(); location.reload(); } }
-
-    async function fetchWeather() {
-        navigator.geolocation.getCurrentPosition(async pos => {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true`);
-            const d = await res.json();
-            const txt = `🌡️ ${d.current_weather.temperature}°C | 💨 ${d.current_weather.windspeed}km/h`;
-            document.getElementById('w-b').innerText = txt;
-            document.getElementById('w-c').innerText = txt;
-        });
     }
 
     function render() {
-        document.documentElement.style.setProperty('--accent', storage.theme);
         ['bike', 'car'].forEach(t => {
-            document.getElementById('km-disp-'+t).innerText = storage[t].km.toLocaleString();
-            const target = t === 'bike' ? 15000 : 20000;
-            document.getElementById('bar-'+t).style.width = Math.min((storage[t].km/target)*100, 100) + "%";
-            
-            // Render Logs
-            const logHTML = storage[t].logs.map(l => `
-                <div class="entry">
-                    <span class="badge">${l.date}</span>
-                    <span style="font-weight:bold">${l.km} km ${l.min ? ' | '+l.min+' Min' : ''}</span>
-                </div>`).join('');
-            document.getElementById('list-'+t+'-logs').innerHTML = logHTML;
-
-            // Render Tanks
-            const tankHTML = storage[t].tanks.map(tank => `
-                <div class="entry">
-                    <span class="badge">${tank.date}</span>
-                    <span style="color:var(--accent); font-weight:bold">${tank.p} €</span>
-                </div>`).join('');
-            document.getElementById('list-'+t+'-tanks').innerHTML = tankHTML;
+            document.getElementById('list-'+t).innerHTML = data[t].logs.map(l => `<div class="entry">${l.d}: ${l.km} km</div>`).join('');
+            document.getElementById('t-list-'+t).innerHTML = data[t].tanks.map(tank => `<div class="entry">${tank.d}: ${tank.p} €</div>`).join('');
         });
     }
 
-    window.onload = () => { loadData(); fetchWeather(); };
+    render();
 </script>
-
 </body>
 </html>
